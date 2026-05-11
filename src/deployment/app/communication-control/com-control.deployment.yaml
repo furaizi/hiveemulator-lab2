@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: com-control
+  labels:
+    app: com-control
 spec:
   replicas: 1
   selector:
@@ -28,7 +30,10 @@ spec:
               cpu: "250m"
           env:
             - name: Redis__ConnectionString
-              value: redis:6379
+              valueFrom:
+                secretKeyRef:
+                  name: com-control-secret
+                  key: redis-connection-string
             - name: BasePath
               value: /control
       imagePullSecrets:
