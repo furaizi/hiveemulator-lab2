@@ -3,7 +3,7 @@ WORKDIR /src
 
 COPY . .
 
-RUN dotnet publish DevOpsProject.CommunicationControl.API.csproj \
+RUN dotnet publish DevOpsProject/DevOpsProject.CommunicationControl.API.csproj \
     -c Release \
     -o /app/published
 
@@ -16,6 +16,8 @@ RUN groupadd --gid 1000 appuser && \
 COPY --from=build --chown=appuser:appuser /app/published ./
 
 USER appuser
+
+ENV ASPNETCORE_URLS=http://*:8080
 
 EXPOSE 8080
 
