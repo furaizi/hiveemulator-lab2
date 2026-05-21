@@ -1,14 +1,22 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0  
-WORKDIR /app  
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
 
-# Create a non-root user and group  
-RUN groupadd --gid 1000 appuser && \  
-    useradd --uid 1000 --gid appuser --shell /bin/bash --create-home appuser  
+COPY . .
 
-# Copy release folder  
-COPY --chown=appuser:appuser published/ ./  
+RUN dotnet publish DevOpsProject.CommunicationControl.API.csproj \
+    -c Release \
+    -o /app/published
 
-USER appuser  
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
 
-EXPOSE 8080  
+RUN groupadd --gid 1000 appuser && \
+    useradd --uid 1000 --gid appuser --shell /bin/bash --create-home appuser
+
+COPY --from=build --chown=appuser:appuser /app/published ./
+
+USER appuser
+
+EXPOSE 8080
+
 ENTRYPOINT ["dotnet", "DevOpsProject.CommunicationControl.API.dll"]
